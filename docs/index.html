@@ -3,39 +3,248 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bookie</title>
-<meta name="description" content="Bookie: lector de libros con voz natural y explicaciones fáciles. Descarga para Android." />
+<title>Bookie · Lee con calma, entiende de verdad</title>
+<meta name="description" content="Bookie lee tus libros en voz alta con una voz natural, te explica cada capítulo en palabras simples y funciona sin internet. Para Android." />
+<meta property="og:title" content="Bookie" />
+<meta property="og:description" content="Lee con calma. Entiende de verdad." />
+<meta property="og:image" content="https://vezzulab.github.io/bookie/assets/library-es.webp" />
+<meta name="theme-color" content="#faf5e8" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='9' width='6.2' height='19' rx='1.6' fill='%230F9D8A'/%3E%3Crect x='10.4' y='4' width='6.2' height='24' rx='1.6' fill='%23FFB81C'/%3E%3Crect x='17.8' y='10' width='6.2' height='18' rx='1.6' fill='%231B2347'/%3E%3Crect x='25' y='13' width='4.6' height='15' rx='1.4' fill='%230F9D8A' transform='rotate(9 27 21)'/%3E%3C/svg%3E" />
+<link rel="preload" href="assets/lexend.woff2" as="font" type="font/woff2" crossorigin />
 <style>
-  :root { --ink:#1b2347; --paper:#faf5e8; --sun:#ffb81c; --card:#fffdf7; --muted:#5a6285; }
-  @media (prefers-color-scheme: dark) { :root { --ink:#eceffb; --paper:#11152a; --card:#1b2140; --muted:#9aa1c4; } }
+  @font-face { font-family: 'Lexend'; src: url(assets/lexend.woff2) format('woff2'); font-weight: 100 900; font-display: swap; }
+  :root {
+    --ink: #1b2347; --paper: #faf5e8; --card: #fffdf7; --muted: #55597a; --line: #e9e1cb;
+    --sun: #ffb81c; --lago: #0f9d8a; --on-sun: #1b2347;
+    --bezel: #141a38;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #f2efe3; --paper: #11152a; --card: #1b2140; --muted: #a2a9cc; --line: #2a3258; --bezel: #070a18; }
+  }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--paper); color:var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height:1.55; }
-  main { max-width:560px; margin:0 auto; padding:56px 22px 64px; text-align:center; }
-  h1 { font-size:40px; margin:10px 0 6px; letter-spacing:-0.02em; }
-  p { color:var(--muted); font-size:18px; }
-  .logo { width:84px; height:84px; }
-  .btn { display:inline-block; margin:22px 0 8px; padding:16px 30px; border-radius:30px; background:var(--sun); color:#1b2347; font-weight:700; font-size:19px; text-decoration:none; }
-  .card { background:var(--card); border-radius:20px; padding:18px 20px; margin-top:28px; text-align:left; }
-  .card h2 { margin:0 0 6px; font-size:18px; }
-  .card li { color:var(--muted); margin:4px 0; }
-  small { color:var(--muted); }
+  html { scroll-behavior: smooth; }
+  body { overflow-x: clip; margin: 0; background: var(--paper); color: var(--ink); font-family: 'Lexend', system-ui, sans-serif; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  html[lang='es'] .en, html[lang='en'] .es { display: none !important; }
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--lago); outline-offset: 3px; border-radius: 8px; }
+  .wrap { width: min(1120px, 100% - 44px); margin-inline: auto; }
+
+  /* Cabecera */
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 800; font-size: 26px; letter-spacing: -0.02em; }
+  .brand svg { width: 36px; height: 36px; }
+  .top nav { display: flex; align-items: center; gap: 14px; }
+  .lang { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+  .lang button { font: inherit; font-size: 14px; font-weight: 600; color: var(--muted); background: none; border: 0; padding: 6px 14px; border-radius: 999px; cursor: pointer; }
+  .lang button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 0 28px; min-height: 56px; border-radius: 999px; background: var(--sun); color: var(--on-sun); font-weight: 700; font-size: 18px; text-decoration: none; box-shadow: 0 14px 28px -12px rgba(255, 184, 28, 0.9); transition: transform 0.15s ease; }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.small { min-height: 44px; padding: 0 20px; font-size: 15px; box-shadow: none; }
+  .btn svg { width: 22px; height: 22px; }
+
+  /* Portada */
+  .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: center; gap: 40px; padding: 36px 0 90px; }
+  h1 { margin: 0; font-size: clamp(42px, 6.4vw, 78px); line-height: 1.02; font-weight: 800; letter-spacing: -0.035em; text-wrap: balance; }
+  .lead { margin: 26px 0 0; max-width: 30em; font-size: clamp(18px, 2vw, 22px); color: var(--muted); }
+  .cta { margin-top: 38px; display: flex; flex-wrap: wrap; align-items: center; gap: 18px 24px; }
+  .cta small { color: var(--muted); font-size: 15px; }
+  .stage { position: relative; display: grid; place-items: center; min-height: 600px; }
+  .spines { position: absolute; inset: 0; }
+  .spine { position: absolute; bottom: 7%; width: 15%; border-radius: 16px; transform-origin: bottom center; animation: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .spine:nth-child(1) { left: 1%; height: 64%; background: var(--lago); animation-delay: 0.05s; }
+  .spine:nth-child(2) { left: 15%; height: 84%; background: var(--sun); animation-delay: 0.15s; }
+  .spine:nth-child(3) { right: 15%; height: 70%; background: var(--ink); animation-delay: 0.25s; }
+  .spine:nth-child(4) { right: 1%; height: 52%; background: var(--lago); transform: rotate(9deg); animation: rise4 0.9s 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .shelf { position: absolute; left: 0; right: 0; bottom: 6%; height: 9px; border-radius: 6px; background: var(--ink); opacity: 0.85; }
+  @keyframes rise { from { transform: scaleY(0.2); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+  @keyframes rise4 { from { transform: rotate(9deg) scaleY(0.2); opacity: 0; } to { transform: rotate(9deg) scaleY(1); opacity: 1; } }
+
+  /* Teléfono */
+  .phone { position: relative; width: min(280px, 66vw); padding: 9px; border-radius: 40px; background: var(--bezel); box-shadow: 0 40px 70px -30px rgba(10, 14, 40, 0.55), 0 0 0 1.5px rgba(255, 255, 255, 0.06) inset; }
+  .phone img { border-radius: 32px; width: 100%; background: var(--paper); }
+  .stage .phone { z-index: 1; transform: rotate(-3deg); }
+
+  /* Funciones */
+  .features { display: grid; gap: clamp(70px, 11vw, 130px); padding: 20px 0 100px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: clamp(30px, 6vw, 90px); }
+  .row.flip .copy { order: 2; }
+  .copy h2 { margin: 0; font-size: clamp(30px, 4vw, 46px); line-height: 1.08; font-weight: 800; letter-spacing: -0.025em; text-wrap: balance; }
+  .copy p { margin: 20px 0 0; max-width: 28em; font-size: 19px; color: var(--muted); }
+  .art { position: relative; display: grid; place-items: center; min-height: 480px; }
+  .art::before { content: ''; position: absolute; width: min(420px, 90%); aspect-ratio: 1; border-radius: 50%; background: color-mix(in srgb, var(--sun) 24%, transparent); }
+  .art.lago::before { background: color-mix(in srgb, var(--lago) 20%, transparent); }
+  .art.ink::before { background: color-mix(in srgb, var(--ink) 11%, transparent); }
+  .art .phone { z-index: 1; }
+  .art.duo .phone:first-child { transform: translateX(14%) rotate(-4deg); }
+  .art.duo .phone:last-child { transform: translateX(-14%) translateY(36px) rotate(4deg); margin-left: -22%; }
+  .art.duo { grid-auto-flow: column; }
+  .art.duo .phone { width: min(250px, 46vw); }
+
+  /* Descarga */
+  .get { background: var(--ink); color: #f6f1e2; border-radius: 36px; padding: clamp(34px, 6vw, 70px); display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; margin-bottom: 70px; }
+  html:not(:root) .get { color: #f6f1e2; }
+  .get h2 { margin: 0; font-size: clamp(32px, 4.6vw, 54px); line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; }
+  .get p { margin: 16px 0 0; color: #c3c8e6; font-size: 18px; }
+  .get .btn { margin-top: 28px; }
+  .steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: center; font-size: 17px; color: #e7e9f7; }
+  .steps li::before { content: counter(s); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--sun); color: #1b2347; font-weight: 800; }
+  @media (prefers-color-scheme: dark) { .get { background: #1b2140; } }
+
+  /* Pie */
+  footer { border-top: 1px solid var(--line); padding: 30px 0 46px; color: var(--muted); font-size: 15px; }
+  footer .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+  footer a { font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 2px solid var(--sun); padding-bottom: 1px; }
+
+  @media (max-width: 860px) {
+    .hero, .row, .get { grid-template-columns: 1fr; }
+    .hero { padding-bottom: 60px; }
+    .stage { min-height: 520px; order: 2; }
+    .row.flip .copy { order: 0; }
+    .art { min-height: 440px; }
+    .art.duo .phone { width: min(230px, 46vw); }
+    .stage .phone { width: min(250px, 58vw); }
+    .top nav .btn { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .spine, .spine:nth-child(4) { animation: none; } html { scroll-behavior: auto; } .btn { transition: none; } }
 </style>
 </head>
 <body>
-<main>
-  <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="9" width="6.2" height="19" rx="1.6" fill="#0F9D8A"/><rect x="10.4" y="4" width="6.2" height="24" rx="1.6" fill="#FFB81C"/><rect x="17.8" y="10" width="6.2" height="18" rx="1.6" fill="#1b2347"/><rect x="25" y="13" width="4.6" height="15" rx="1.4" fill="#0F9D8A" transform="rotate(9 27 21)"/><rect x="1.5" y="28.2" width="29" height="2.2" rx="1.1" fill="#1b2347" opacity=".35"/></svg>
-  <h1>Bookie</h1>
-  <p>Lee con voz natural y entiende lo que lees. Funciona sin internet.</p>
-  <a class="btn" href="https://github.com/vezzulab/bookie/releases/download/v1.1.0/Bookie-1.1.0.apk">Descargar para Android · 1.1.0</a><br />
-  <small>APK de 56.6 MB · Requiere Android 7 o superior</small>
-  <div class="card">
-    <h2>Cómo instalarlo</h2>
-    <ol>
-      <li>Abre este enlace desde tu teléfono o tablet y descarga el archivo.</li>
-      <li>Al abrirlo, Android te pedirá permitir instalar desde esta fuente.</li>
-      <li>Desde ahí, Bookie te avisa solo cuando hay una versión nueva.</li>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" aria-label="Bookie">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="9" width="6.2" height="19" rx="1.6" fill="#0F9D8A"/><rect x="10.4" y="4" width="6.2" height="24" rx="1.6" fill="#FFB81C"/><rect x="17.8" y="10" width="6.2" height="18" rx="1.6" fill="currentColor"/><rect x="25" y="13" width="4.6" height="15" rx="1.4" fill="#0F9D8A" transform="rotate(9 27 21)"/></svg>
+      Bookie
+    </a>
+    <nav>
+      <div class="lang" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="es" aria-pressed="true">ES</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn small" href="https://github.com/vezzulab/bookie/releases/download/v1.1.1/Bookie-1.1.1.apk"><span class="es">Descargar</span><span class="en">Download</span></a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1><span class="es">Lee con calma. Entiende de verdad.</span><span class="en">Read calmly. Truly understand.</span></h1>
+      <p class="lead">
+        <span class="es">Bookie lee tus libros en voz alta con una voz natural, te explica cada capítulo en palabras simples y funciona sin internet.</span>
+        <span class="en">Bookie reads your books aloud in a natural voice, explains each chapter in simple words, and works without internet.</span>
+      </p>
+      <div class="cta">
+        <a class="btn" href="https://github.com/vezzulab/bookie/releases/download/v1.1.1/Bookie-1.1.1.apk">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>
+          <span class="es">Descargar para Android</span><span class="en">Download for Android</span>
+        </a>
+        <small><span class="es">Gratis · versión 1.1.1 · 56.6 MB</span><span class="en">Free · version 1.1.1 · 56.6 MB</span></small>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="spines" aria-hidden="true"><i class="spine"></i><i class="spine"></i><i class="spine"></i><i class="spine"></i><i class="shelf"></i></div>
+      <div class="phone">
+        <img class="es" src="assets/library-es.webp" width="620" height="1377" alt="Biblioteca de Bookie con la portada y la descripción del libro" />
+        <img class="en" src="assets/library-en.webp" width="620" height="1377" alt="Bookie library showing a book cover and its description" />
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="row">
+      <div class="copy">
+        <h2><span class="es">Escucha tus libros.</span><span class="en">Listen to your books.</span></h2>
+        <p><span class="es">Una voz que suena a persona, no a robot. Cada frase se resalta mientras la oyes, con pausas de verdad en comas y puntos. En español y en inglés, sin conexión.</span>
+           <span class="en">A voice that sounds like a person, not a robot. Each sentence is highlighted as you hear it, with real pauses at commas and periods. In Spanish and English, offline.</span></p>
+      </div>
+      <div class="art lago">
+        <div class="phone"><img class="es" loading="lazy" src="assets/reader-es.webp" width="620" height="1377" alt="Lector de Bookie con la frase actual resaltada" /><img class="en" loading="lazy" src="assets/reader-en.webp" width="620" height="1377" alt="Bookie reader with the current sentence highlighted" /></div>
+      </div>
+    </div>
+
+    <div class="row flip">
+      <div class="copy">
+        <h2><span class="es">Entiende lo que lees.</span><span class="en">Understand what you read.</span></h2>
+        <p><span class="es">Antes de leer: de qué trata, una imagen para verlo en tu cabeza, las ideas clave y las palabras difíciles. Al terminar, tres preguntas rápidas para comprobar que lo entendiste.</span>
+           <span class="en">Before reading: what it’s about, a picture to see it in your head, the key ideas, and the hard words. Afterwards, three quick questions to check you got it.</span></p>
+      </div>
+      <div class="art duo">
+        <div class="phone"><img class="es" loading="lazy" src="assets/guide-es.webp" width="620" height="1377" alt="Guía: imagina la escena" /><img class="en" loading="lazy" src="assets/guide-en.webp" width="620" height="1377" alt="Guide: picture the scene" /></div>
+        <div class="phone"><img class="es" loading="lazy" src="assets/quiz-es.webp" width="620" height="1377" alt="Pregunta de comprensión con la respuesta correcta" /><img class="en" loading="lazy" src="assets/quiz-en.webp" width="620" height="1377" alt="Comprehension question with the correct answer" /></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="copy">
+        <h2><span class="es">Se siente como un libro.</span><span class="en">It feels like a book.</span></h2>
+        <p><span class="es">Pasa la página con un toque o deslizando. Cada capítulo muestra de qué página a qué página va, puedes dejar marcadores para no perder el lugar y ajustar la letra a tu medida.</span>
+           <span class="en">Turn the page with a tap or a swipe. Every chapter shows which pages it covers, you can leave bookmarks so you never lose your place, and size the text to suit you.</span></p>
+      </div>
+      <div class="art ink">
+        <div class="phone"><img class="es" loading="lazy" src="assets/chapters-es.webp" width="620" height="1377" alt="Lista de capítulos con sus páginas" /><img class="en" loading="lazy" src="assets/chapters-en.webp" width="620" height="1377" alt="Chapter list with page numbers" /></div>
+      </div>
+    </div>
+
+    <div class="row flip">
+      <div class="copy">
+        <h2><span class="es">Tu estantería, ordenada.</span><span class="en">Your shelf, in order.</span></h2>
+        <p><span class="es">Deja tus PDF y EPUB en una carpeta y aparecen solos, con su portada y una breve descripción. Busca y ordénalos por título, autor, género, idioma o progreso.</span>
+           <span class="en">Drop your PDF and EPUB files in a folder and they show up on their own, with a cover and a short description. Search and sort by title, author, genre, language, or progress.</span></p>
+      </div>
+      <div class="art">
+        <div class="phone"><img class="es" loading="lazy" src="assets/shelf-es.webp" width="620" height="1377" alt="Estantería agrupada por género" /><img class="en" loading="lazy" src="assets/shelf-en.webp" width="620" height="1377" alt="Shelf grouped by genre" /></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="copy">
+        <h2><span class="es">Solo tuyo.</span><span class="en">Yours alone.</span></h2>
+        <p><span class="es">Tus libros se quedan en tu dispositivo. Protege Bookie con un PIN para que nadie más abra tu biblioteca.</span>
+           <span class="en">Your books stay on your device. Protect Bookie with a PIN so nobody else opens your library.</span></p>
+      </div>
+      <div class="art lago">
+        <div class="phone"><img class="es" loading="lazy" src="assets/lock-es.webp" width="620" height="1377" alt="Pantalla de PIN de Bookie" /><img class="en" loading="lazy" src="assets/lock-en.webp" width="620" height="1377" alt="Bookie PIN screen" /></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="get" id="descargar">
+    <div>
+      <h2><span class="es">Llévate Bookie.</span><span class="en">Get Bookie.</span></h2>
+      <p><span class="es">Gratis, para Android 7 o superior.</span><span class="en">Free, for Android 7 or newer.</span></p>
+      <a class="btn" href="https://github.com/vezzulab/bookie/releases/download/v1.1.1/Bookie-1.1.1.apk"><span class="es">Descargar · 1.1.1</span><span class="en">Download · 1.1.1</span></a>
+    </div>
+    <ol class="steps">
+      <li><span class="es">Descarga el archivo desde tu teléfono o tablet.</span><span class="en">Download the file on your phone or tablet.</span></li>
+      <li><span class="es">Ábrelo y permite instalar desde esta fuente.</span><span class="en">Open it and allow installing from this source.</span></li>
+      <li><span class="es">Listo. Las nuevas versiones te avisan dentro de la app.</span><span class="en">Done. New versions notify you inside the app.</span></li>
     </ol>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Bookie</span>
+    <span><span class="es">Un producto de</span><span class="en">A product of</span> <a href="https://vezzu.studio" rel="noopener">Vezzu Studio</a></span>
   </div>
-</main>
+</footer>
+
+<script>
+  (function () {
+    var KEY = 'bookie-site-lang';
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    var lang = saved || ((navigator.language || 'es').toLowerCase().indexOf('en') === 0 ? 'en' : 'es');
+    function apply(l) {
+      document.documentElement.lang = l;
+      document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.lang === l ? 'true' : 'false'); });
+      document.title = l === 'en' ? 'Bookie · Read calmly, truly understand' : 'Bookie · Lee con calma, entiende de verdad';
+    }
+    document.querySelectorAll('.lang button').forEach(function (b) {
+      b.addEventListener('click', function () { lang = b.dataset.lang; try { localStorage.setItem(KEY, lang); } catch (e) {} apply(lang); });
+    });
+    apply(lang);
+  })();
+</script>
 </body>
 </html>
